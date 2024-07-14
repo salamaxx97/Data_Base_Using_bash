@@ -1,17 +1,18 @@
+#!/bin/bash
 createDB (){
      while [ true ]
     do
      echo  "Enter Name of database to be created type back to return to main menu"
      read -r DBname
-     if [[ $DBname =~ [Bb][aA][cC][Kk]  ]] ; then
+     if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$  ]] ; then
       echo "back to main";break
-     elif [ -d $DBname ] ; then echo "Database $DBname Already exists";break
-     elif ! [[ $DBname =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
+     elif [ -d ./DataBases/$DBname ] ; then echo "Database '$DBname' Already exists";break
+     elif ! [[ "$DBname" =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
       echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
      else
-      mkdir -p DataBases/$DBname
-      echo "database $DBname created"
+      mkdir -p ./DataBases/$DBname  && echo "database '$DBname' created" || echo "Failed to create database '%DBname'\n"
       break
       fi
     done
 }
+createDB
