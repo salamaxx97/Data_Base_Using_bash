@@ -18,6 +18,8 @@ while true; do
     if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
         echo "Back to main menu"
         break
+    elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
+                exit
     elif ! [[ "$DBname" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
         echo "Invalid DB Name"
     elif ! [ -d "./DataBases/$DBname" ]; then

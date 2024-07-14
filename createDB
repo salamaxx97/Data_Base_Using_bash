@@ -6,10 +6,12 @@ createDB (){
      read -r DBname
      if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$  ]] ; then
       echo "back to main";break
-     elif [ -z $DBname  ]; then continue
-     elif [ -d ./DataBases/$DBname ] ; then echo "Database '$DBname' Already exists"
+    elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
+            exit
+     elif [ -z $DBname  ]; then echo "Database name can't be empty" ;continue
      elif ! [[ "$DBname" =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
-      echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
+           echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
+     elif [ -d ./DataBases/$DBname ] ; then echo "Database '$DBname' Already exists"
      else
       mkdir -p ./DataBases/$DBname  && echo "database '$DBname' created" || echo "Failed to create database '%DBname'\n"
       break
