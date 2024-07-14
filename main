@@ -11,7 +11,7 @@ createDB (){
      elif ! [[ $DBname =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
       echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
      else
-      mkdir $DBname
+      mkdir -p DataBases/$DBname
       echo "database $DBname created"
       break
       fi
