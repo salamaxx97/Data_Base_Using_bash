@@ -1,17 +1,22 @@
 #!/bin/bash
 
-listDBS() {
+listDBs() {
   if [ -d DataBases ]; then
     dbs=$(ls -F DataBases | grep '/' )
     if [ -z "$dbs" ]; then
       echo "No databases found."
     else
       echo "Databases in DataBases directory:"
-      echo "$dbs"
+      #loop to remove slash
+      for i in $dbs
+      do
+        echo ${i%/}
+        #echo ${i[@]:0:${#i}-1}
+      done
     fi
   else
     echo "DataBases directory not found."
   fi
 }
 
-listDBS
+listDBs
