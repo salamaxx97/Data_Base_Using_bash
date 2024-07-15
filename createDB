@@ -1,6 +1,6 @@
 #!/bin/bash
 createDB (){
-     while [ true ]
+    while [ true ]
     do
      echo  "Enter Name of database to be created type back to return to main menu"
      read -r DBname

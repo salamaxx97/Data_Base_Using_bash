@@ -1,0 +1,79 @@
+#!/bin/bash
+checkDB(){
+  while [ true ]
+      do
+      echo "Enter db name to connect or type 'back' to return to the main menu"
+      read -r DBname
+      if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+          echo "Back to main menu"
+          exit
+      elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
+                  exit
+      elif ! [[ "$DBname" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+          echo "Invalid DB Name" ;
+      elif ! [ -d "./DataBases/$DBname" ]; then
+          echo "Database '$DBname' doesn't exist" ;
+      elif [ -d "./DataBases/$DBname" ]; then
+            cd "./DataBases/$DBname" && echo "Successfully connected to '$DBname' " || echo "Failed to connect to $DBname"
+            break
+      fi
+  done
+
+}
+createTable () {
+../../createTable
+}
+
+dropTable () {
+
+pass
+
+}
+
+listTables () {
+  pass
+}
+
+insertIntoTable () {
+  pass
+}
+
+selectFromTable () {
+  pass
+}
+
+deleteFromTable (){
+   pass
+}
+
+updateTable (){
+  pass
+}
+
+
+connectDB () {
+checkDB
+
+PS3="'$DBname' >> choose your option or press enter to show options again: "
+select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
+do
+if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then exit
+elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
+fi
+case $task in
+"Create Table" ) createTable  ;;
+"List Tables" ) dropTable ;;
+"Drop Table"  ) listTables ;;
+"Insert into Table" ) insertIntoTable ;;
+"Select From Table" ) selectFromTable ;;
+"Delete From Table" ) deleteFromTable ;;
+"Update Table"  ) updateTable ;;
+"back to main" ) exit ;;
+* ) echo "Invalid option Try Again" ;;
+
+esac
+
+done
+}
+
+connectDB

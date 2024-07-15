@@ -11,7 +11,6 @@ confirm_delete() {
     done
 }
 dropDB(){
-DBname=""
 while true; do
     echo "Enter db name to drop or type 'back' to return to the main menu"
     read -r DBname

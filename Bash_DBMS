@@ -1,14 +1,16 @@
 #!/bin/bash
 shopt -s extglob
 
-PS3="enter number 1)createDB 2)listDBs 3)connectDB 4)dropDB 5)exit:  "
+#PS3="enter number 1)createDB 2)listDBs 3)connectDB 4)dropDB 5)exit:  "
+PS3="MAIN MENU choose your option or press enter to show options again:  "
 select task in createDB listDBs connectDB dropDB exit
 do
+  PS3="MAIN MENU choose your option or press enter to show options again:  "
   if [[ "$REPLY" = 5 || "$REPLY" = "exit" ]] ; then
   exit
   elif [[ "$REPLY" =~ ^[1-4]$ ]] ; then
       if [[ -f "./$task" && -x "./$task" ]]; then
-        . "./$task"
+      ./$task
       else
         echo "Script './$task' not found or not executable"
       fi
