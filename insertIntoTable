@@ -1,0 +1,113 @@
+#!/bin/bash
+isUnique (){
+   occ=$(cut -f1 -d, "$1" | grep "^$2$")
+   if [ -z $occ ];then
+     return 0
+   else
+     return 1
+    fi
+
+}
+confirmInsertion() {
+    local templine=''
+    local prompt=''
+    local i=0
+    IFS=','; read -r -a templine <<< "$1"
+    IFS=' '; read -r -a colLabel <<< "$2"
+
+    for label in "${colLabel[@]}" ; do
+        prompt+="$label=${templine[$i]}\n"
+        ((i++))
+    done
+
+    while true ; do
+        echo -en "$prompt" #-e to print \n
+        echo -n "Confirm your data is correct (y/n): "
+        read -r var
+        case $var in
+            Y|y) echo "Data confirmed" ; return 0;;
+            N|n) echo "Insert aborted" ; return 1;;
+            *) echo "Invalid input, please enter (y/n)";;
+        esac
+    done
+}
+
+insertIntoTable() {
+    while true; do
+        local tableName=''
+        local colLabel=''
+        local colType=''
+        local colIsNull=''
+        local dataLine=''
+
+        read -rp "Enter Table Name you want to insert into (type 'exit' to abort): " tableName
+
+        if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            exit
+        elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            exit
+        elif [ -z "$tableName" ]; then
+            echo "Table name can't be empty"
+            continue
+        elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+            echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+            continue
+        elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+            echo "Table '$tableName' doesn't exist or is corrupted"
+            exit 1
+        else
+            colLabel=$(sed -n "1p" "./$tableName.metadata")
+            IFS=' '; read -r -a colLabel <<< "$colLabel"
+
+            colType=$(sed -n "2p" "./$tableName.metadata")
+            IFS=' '; read -r -a colType <<< "$colType"
+
+            colIsNull=$(sed -n "3p" "./$tableName.metadata")
+            IFS=' '; read -r -a colIsNull <<< "$colIsNull"
+
+            for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
+                col=${colLabel[$i]}
+                read -r -p "'$col' (${colType[$i]}) : " data
+                if [[ -z "$data" && "${colIsNull[$i]}" == "NULL" ]]; then
+                    dataLine+=" ,"
+                elif [[ -z "$data" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
+                    echo "'$col' can't be NULL"
+                    ((i--))
+                    continue
+                elif [[ "${colType[$i]}" == "integer" && "$data" =~ ^[0-9]*$  ]]; then
+                    if [ $i = 0 ] && ! isUnique $tableName $data ;then
+                      echo "Primary key Must be unique"
+                      ((i--))
+                      continue
+                    fi
+                    dataLine+="$data,"
+                elif [[ "${colType[$i]}" == "string" && "$data" =~ ^[^,]*$ ]]; then
+                     if [ $i = 0 ] && ! isUnique $tableName $data ;then
+                          echo "Primary key Must be unique"
+                          ((i--))
+                          continue
+                     fi
+                    dataLine+="$data,"
+                else
+                    echo "Invalid Data Type or Format for '$col'"
+                    ((i--))
+                    continue
+                fi
+            done
+
+            # Remove the trailing comma
+            dataLine=${dataLine%,}
+            colLabel=$(sed -n "1p" "./$tableName.metadata")
+
+            if confirmInsertion "$dataLine" "$colLabel"; then
+                echo "$dataLine" >> "./$tableName"
+                echo "Data inserted successfully into '$tableName'"
+            else
+                echo "Insert canceled"
+                exit 1
+            fi
+        fi
+    done
+}
+
+insertIntoTable

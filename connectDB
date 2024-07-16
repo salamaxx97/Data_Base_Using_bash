@@ -39,7 +39,7 @@ listTables () {
 }
 
 insertIntoTable () {
-  pass
+../../insertIntoTable
 }
 
 selectFromTable () {
