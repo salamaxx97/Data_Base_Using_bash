@@ -1,4 +1,5 @@
 #!/bin/bash
+
 createDB (){
     while [ true ]
     do

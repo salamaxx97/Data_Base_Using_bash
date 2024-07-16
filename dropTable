@@ -1,0 +1,57 @@
+#!/bin/bash
+confirm_delete () {
+    while true; do
+        read -p "Are you sure you want to delete the table '$1'? (y/n): " choice
+        case "$choice" in
+            y|Y ) return 0;;
+            n|N ) return 1;;
+            * ) echo "Please answer y or n.";;
+        esac
+    done
+}
+
+dropTable() {
+    while true; do
+        tableName=''
+        read -rp "Enter Table Name to delete type (exit) to abort: " tableName
+        if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            exit
+        elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            exit
+        elif [ -z "$tableName" ]; then
+            echo "Table name can't be empty"
+            continue
+        elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+            echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+        elif ! [ -f "./$tableName" ] && ! [ -f "./$tableName.metadata" ]; then
+            echo "Table '$tableName' doesn't exist"
+        else
+            if confirm_delete "$tableName"; then
+                if [ -f "./$tableName" ]; then
+                    rm -f "./$tableName"
+                    if [ $? -ne 0 ]; then
+                        echo "Failed to delete '$tableName'"
+                        exit 1
+                    else
+                        echo "Data of '$tableName' is deleted"
+                    fi
+                fi
+                if [ -f "./$tableName.metadata" ]; then
+                    rm -f "./$tableName.metadata"
+                    if [ $? -ne 0 ]; then
+                        echo "Failed to delete '$tableName.metadata'"
+                        exit 1
+                    else
+                        echo "Metadata for '$tableName' is deleted"
+                    fi
+                fi
+                echo "'$tableName' is deleted successfully"
+            else
+                echo "Deletion of $tableName is aborted"
+                exit 0
+            fi
+        fi
+    done
+}
+
+dropTable

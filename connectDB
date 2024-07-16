@@ -1,7 +1,11 @@
 #!/bin/bash
 checkDB(){
   while [ true ]
-      do
+    do
+      dbs=$(ls -F DataBases)
+      if ! [ -d DataBases ] || [ -z "$dbs" ]; then
+        echo "there is no Database to connect " ; exit
+      fi
       echo "Enter db name to connect or type 'back' to return to the main menu"
       read -r DBname
       if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
@@ -26,7 +30,7 @@ createTable () {
 
 dropTable () {
 
-pass
+../../dropTable
 
 }
 
@@ -53,7 +57,6 @@ updateTable (){
 
 connectDB () {
 checkDB
-
 PS3="'$DBname' >> choose your option or press enter to show options again: "
 select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
 do
@@ -62,8 +65,8 @@ elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
 fi
 case $task in
 "Create Table" ) createTable  ;;
-"List Tables" ) dropTable ;;
-"Drop Table"  ) listTables ;;
+"List Tables" ) listTables ;;
+"Drop Table"  ) dropTable ;;
 "Insert into Table" ) insertIntoTable ;;
 "Select From Table" ) selectFromTable ;;
 "Delete From Table" ) deleteFromTable ;;
