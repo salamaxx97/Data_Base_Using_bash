@@ -35,7 +35,7 @@ dropTable () {
 }
 
 listTables () {
-  pass
+../../listTables $1
 }
 
 insertIntoTable () {
@@ -65,7 +65,7 @@ elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
 fi
 case $task in
 "Create Table" ) createTable  ;;
-"List Tables" ) listTables ;;
+"List Tables" ) listTables $DBname ;;
 "Drop Table"  ) dropTable ;;
 "Insert into Table" ) insertIntoTable ;;
 "Select From Table" ) selectFromTable ;;
