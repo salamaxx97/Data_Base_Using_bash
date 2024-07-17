@@ -48,8 +48,12 @@ deleteFromTable () {
             # Abort if the given label not found in metadata first line
 
             read -rp "Enter the value to match: " value
+            if [[ -z $value  ]]; then
+              value="NULL"
+            fi
+
             if [[ -z $(grep -w $value "./$tableName") ]]; then
-              echo "valu '$value' not founded"
+              echo "value '$value' not founded"
               continue
             fi
             # Checking value globally first
