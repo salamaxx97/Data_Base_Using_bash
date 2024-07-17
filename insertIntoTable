@@ -69,8 +69,8 @@ insertIntoTable() {
                 col=${colLabel[$i]}
                 read -r -p "'$col' (${colType[$i]}) : " data
                 if [[ -z "$data" && "${colIsNull[$i]}" == "NULL" ]]; then
-                    dataLine+=" ,"
-                elif [[ -z "$data" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
+                    dataLine+="NULL,"
+                elif [[ -z "$data" || $data=="NULL" && "${colIsNull[$i]}" == "NOTNULL"  ]]; then
                     echo "'$col' can't be NULL"
                     ((i--))
                     continue

@@ -47,7 +47,7 @@ selectFromTable () {
 }
 
 deleteFromTable (){
-   pass
+../../deleteFromTable
 }
 
 updateTable (){
