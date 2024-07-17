@@ -1,0 +1,3 @@
+id date
+integer string
+NOTNULL NULL
