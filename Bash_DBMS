@@ -1,4 +1,5 @@
 #!/bin/bash
+clear
 shopt -s extglob
 
 #PS3="enter number 1)createDB 2)listDBs 3)connectDB 4)dropDB 5)exit:  "

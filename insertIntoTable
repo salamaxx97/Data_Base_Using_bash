@@ -1,5 +1,6 @@
 #!/bin/bash
 isUnique (){
+   #$1 is table name $2 is colname
    occ=$(cut -f1 -d, "$1" | grep "^$2$")
    if [ -z $occ ];then
      return 0
@@ -39,7 +40,10 @@ insertIntoTable() {
         local colType=''
         local colIsNull=''
         local dataLine=''
-
+        tables=$(ls)
+        if  [ -z "$tables" ]; then
+                echo "there is no tables to insert into " ; exit
+        fi
         read -rp "Enter Table Name you want to insert into (type 'exit' to abort): " tableName
 
         if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then

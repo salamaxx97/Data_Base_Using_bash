@@ -56,27 +56,27 @@ updateTable (){
 
 
 connectDB () {
-checkDB
-PS3="'$DBname' >> choose your option or press enter to show options again: "
-select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
-do
-if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then exit
-elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
-fi
-case $task in
-"Create Table" ) createTable  ;;
-"List Tables" ) listTables $DBname ;;
-"Drop Table"  ) dropTable ;;
-"Insert into Table" ) insertIntoTable ;;
-"Select From Table" ) selectFromTable ;;
-"Delete From Table" ) deleteFromTable ;;
-"Update Table"  ) updateTable ;;
-"back to main" ) exit ;;
-* ) echo "Invalid option Try Again" ;;
+  checkDB
+  PS3="'$DBname' >> choose your option or press enter to show options again: "
+  select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
+  do
+    if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then exit
+    elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
+    fi
+    case $task in
+      "Create Table" ) createTable  ;;
+      "List Tables" ) listTables $DBname ;;
+      "Drop Table"  ) dropTable ;;
+      "Insert into Table" ) insertIntoTable ;;
+      "Select From Table" ) selectFromTable ;;
+      "Delete From Table" ) deleteFromTable ;;
+      "Update Table"  ) updateTable ;;
+      "back to main" ) exit ;;
+      * ) echo "Invalid option Try Again" ;;
 
-esac
+    esac
 
-done
+  done
 }
 
 connectDB

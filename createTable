@@ -2,7 +2,7 @@
 
 tableName=''
 while [ true ]; do
-    read -rp "Enter Table Name : " tableName
+    read -rp "Enter Table Name you want to create or type 'exit' to exit: " tableName
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
         exit
     elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
@@ -15,7 +15,7 @@ while [ true ]; do
     elif [[ -f "./$tableName" || -f "./$tableName.metadata" ]]; then
         echo "Table '$tableName' Already exists"
     else
-        touch  $tableName  && echo "table '$tableName' created" || echo "Failed to create table '%tableName' \n"
+        #touch  $tableName  && echo "table '$tableName' created" || echo "Failed to create table '%tableName' \n"
         break
     fi
 done
@@ -47,6 +47,10 @@ for (( i=0 ; i < $col ; i++ )); do
         echo "Invalid column name it must start with a letter and only contains letter numbers and underscores"
         ((i--))
         continue
+    elif [[ " ${line1[@]} " =~ " ${colabel} " ]] ; then
+        echo "'$colabel' already exists "
+        ((i--))
+        continue
     else
         line1[${i}]="$colabel"
         read -p   "type of '$colabel' string or integer (s/i) " coltype
@@ -69,6 +73,7 @@ for (( i=0 ; i < $col ; i++ )); do
     fi
 done
 
+touch  $tableName
 echo ${line1[@]} > ./$tableName.metadata
 echo ${line2[@]} >> ./$tableName.metadata
 echo ${line3[@]} >> ./$tableName.metadata

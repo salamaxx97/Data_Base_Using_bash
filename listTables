@@ -1,7 +1,7 @@
 #!/bin/bash
 
 listTables() {
-  tables=$( ls | grep -v '.metadata' )
+  tables=$( ls | grep -v .metadata )
   if [ -z "$tables" ]; then
     echo "No Tables found."
     else

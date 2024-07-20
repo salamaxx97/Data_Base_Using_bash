@@ -2,6 +2,10 @@
 
 deleteFromTable () {
   while true; do
+    tables=$(ls)
+    if  [ -z "$tables" ]; then
+           echo "there is no tables to delete from it " ; exit
+    fi
     read -rp "Enter Table Name you want to delete from (type 'exit' to abort): " tableName
     # check table name is correct and exists
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
@@ -110,6 +114,7 @@ deleteFromTable () {
                 ;;
               * )
                 echo "Abort deletion"
+                rm ./$tableName.opt
                 continue
                 ;;
             esac
