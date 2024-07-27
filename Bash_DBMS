@@ -1,7 +1,9 @@
 #!/bin/bash
 clear
+#to move to script location
+cd $(dirname $(readlink -f $0))
+#pwd
 shopt -s extglob
-
 #PS3="enter number 1)createDB 2)listDBs 3)connectDB 4)dropDB 5)exit:  "
 PS3="MAIN MENU choose your option or press enter to show options again:  "
 select task in createDB listDBs connectDB dropDB exit

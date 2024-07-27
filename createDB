@@ -3,7 +3,7 @@
 createDB (){
     while [ true ]
     do
-     echo  "Enter Name of database to be created type back to return to main menu"
+     echo  "Enter Name of database to be created type 'exit' to return to main menu"
      read -r DBname
      if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$  ]] ; then
       echo "back to main";break
