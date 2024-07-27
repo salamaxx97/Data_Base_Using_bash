@@ -1,0 +1,135 @@
+#!/bin/bash
+
+updateTable () {
+  while true; do
+    tables=$(ls)
+    if  [ -z "$tables" ]; then
+           echo "there is no tables to update" ; exit
+    fi
+    read -rp "Enter Table Name you want to delete from (type 'exit' to abort): " tableName
+    # check table name is correct and exists
+    if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+      exit
+    elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+      exit
+    elif [ -z "$tableName" ]; then
+      echo "Table name can't be empty"
+      continue
+    elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+      echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+      continue
+    elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+      echo "Table '$tableName' doesn't exist or is corrupted"
+      exit 1
+    else # table founded
+      while true; do
+        echo "Choose an option:"
+        echo "1. Delete All Rows of '$tableName'"
+        echo "2. Delete Rows Based on Condition"
+        read -rp "Enter your choice (1 or 2 or exit): " choice
+        case $choice in
+          "1" )
+            read -rp "To confirm deletion of all rows in '$tableName', type (y) ? " confirm
+            case $confirm in
+              y|Y )
+                > "./$tableName" && echo "All rows deleted from '$tableName'" || echo "Failed to delete all rows in '$tableName' "
+                exit
+                ;;
+              * )
+                echo "Abort deletion"
+                exit
+                ;;
+            esac
+            ;;
+          "2" )
+            colLabel=$(head -1 "./$tableName.metadata")
+            echo "Labels: $colLabel"
+            read -rp "Enter the column name to match: " colName
+            if [[ -z $(echo "$colLabel" | grep -w $colName) ]]; then
+              echo "label '$colName' not founded"
+              continue
+            fi
+            # Abort if the given label not found in metadata first line
+
+            read -rp "Enter the value to match: " value
+            if [[ -z $value  ]]; then
+              value="NULL"
+            fi
+
+            if [[ -z $(grep -w $value "./$tableName") ]]; then
+              echo "value '$value' not founded"
+              continue
+            fi
+            # Checking value globally first
+
+            IFS=' '; read -r -a colLabel <<< "$colLabel" # converting labels to array to loop through
+            colNumber=0
+            for (( i = 0; i < ${#colLabel[@]} ; i++ )); do
+              # debugging code
+              # echo $colNumber
+              # echo ${colLabel[$i]}
+              # echo ${#colLabel[@]}
+              # echo ${colLabel[@]}
+              if [ "${colLabel[$i]}" = "$colName" ]; then
+                colNumber=$((i+1))
+                # echo $colNumber
+                break
+              fi
+            done
+            if [ $colNumber = 0 ]; then
+              echo "'$colName' column not found"
+              continue
+            fi
+            colData=$(cut -d, -f "$colNumber" "./$tableName")
+            # saving data of the targeted col in variable coldata
+            # echo $colData # debug
+            if [[ -z $(echo "$colData" | grep "^$value$") ]]; then
+              echo "$value not found"
+              continue
+            fi
+            # checking if value given exists in targeted column
+
+            rowNumbers=$(echo "$colData" | awk -v val="$value" 'BEGIN { ORS=" " } { if ($0 == val) print NR }')
+            # echo $rowNumbers #
+            # using awk to get number if rows their value equal to given value ORS is output record separator
+            command="sed"
+            rows=''
+            IFS=' '; read -r -a rowNumbers <<< "$rowNumbers"
+            # echo ${rowNumbers[@]} # debug
+            for i in "${rowNumbers[@]}"; do
+              command+=" -e '${i}d' "
+              # add every number to command se to delete
+              rows+="$(sed -n "${i}p" ./$tableName)"$'\n'
+              # add full rows to print them to user for confirmation
+            done
+            command+=" $tableName"
+            # echo $command # debug
+            eval "$command" > $tableName.opt
+            echo "Are you sure you want to delete these rows:"
+            echo "$rows"
+            read -rp "To confirm deletion of these rows in '$tableName', type (y) ? " confirm
+            case $confirm in
+              y|Y )
+                cat "./$tableName.opt" > "./$tableName" && echo "Rows number '$rowNumbers' deleted" && rm ./$tableName.opt || echo "Failed to delete"
+                ;;
+              * )
+                echo "Abort deletion"
+                rm ./$tableName.opt
+                continue
+                ;;
+            esac
+            ;;
+          "exit" )
+            exit
+            ;;
+          * )
+            echo "Invalid option"
+            continue
+            ;;
+        esac
+      done
+    fi
+  done
+}
+
+updateTable
