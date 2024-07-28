@@ -55,6 +55,7 @@ updateTable (){
 }
 
 
+
 connectDB () {
   checkDB
   PS3="'$DBname' >> choose your option or press enter to show options again: "
