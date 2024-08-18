@@ -71,7 +71,7 @@ insertIntoTable() {
 
             for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
                 col=${colLabel[$i]}
-                read -r -p "'$col' (${colType[$i]}) : " data
+                read -r -p "'$col' (${colType[$i]}) (${colIsNull[$i]}): " data
                 if [[ -z "$data" && "${colIsNull[$i]}" == "NULL" ]]; then
                     dataLine+="NULL,"
                 elif [[ ( -z "$data" || $data == "NULL" ) && "${colIsNull[$i]}" == "NOTNULL"  ]]; then
