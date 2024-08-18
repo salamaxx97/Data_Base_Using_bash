@@ -1,3 +1,27 @@
+#!/bin/bash
+confirmInsertion() {
+    local templine=''
+    local prompt=''
+    local i=0
+    IFS=','; read -r -a templine <<< "$1"
+    IFS=' '; read -r -a ${colLabel[@]} <<< "$2"
+
+    for label in "${colLabel[@]}" ; do
+        prompt+="$label=${templine[$i]}\n"
+        ((i++))
+    done
+
+    while true ; do
+        echo -en "$prompt" #-e to print \n
+        echo -n "Confirm your data is correct (y/n): "
+        read -r var
+        case $var in
+            Y|y) echo "Data confirmed" ; return 0;;
+            N|n) echo "Operation aborted" ; return 1;;
+            *) echo "Invalid input, please enter (y/n)";;
+        esac
+    done
+}
 updateTable() {
     local tableName=''
     local primaryKey=''
@@ -22,13 +46,13 @@ updateTable() {
         exit
     elif [ -z "$tableName" ]; then
         echo "Table name can't be empty."
-        continue
+        exit
     elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
         echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
-        continue
+        exit
     elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
         echo "Table '$tableName' doesn't exist or is corrupted."
-        continue
+        exit
     fi
 
     colLabel=$(sed -n "1p" "./$tableName.metadata")
@@ -44,6 +68,10 @@ updateTable() {
     read -rp "Enter the primary key value of the record you want to update: " primaryKey
 
     # Find the record
+    if [ -z $primaryKey ]; then
+      echo "primary Key can't be NULL"
+      exit
+    fi
     record=$(grep "^$primaryKey," "./$tableName")
     if [ -z "$record" ]; then
         echo "No record found with primary key '$primaryKey'."
@@ -85,9 +113,9 @@ updateTable() {
     newLine=${newLine%,}
 
     if $updateOccurred; then
-        if confirmInsertion "$newLine" "$colLabel"; then
+        if confirmInsertion "$newLine" "${colLabel[@]}"; then
             # Update the record in the file
-            sed -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
+            sed  -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
             echo "Record with primary key '$primaryKey' updated successfully in '$tableName'."
         else
             echo "Update canceled."
