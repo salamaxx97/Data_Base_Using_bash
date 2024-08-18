@@ -82,7 +82,9 @@ updateTable() {
 
     for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
         col=${colLabel[$i]}
-        echo -n "'$col' (${colType[$i]}) [current: ${oldData[$i]}]: "
+        echo "Press Enter to keep old value"
+        exho "Type NULL to set $col's value to NULL"
+        echo -n "'$col' (${colType[$i]}) (${colIsNull[$i]})  [current: ${oldData[$i]}]: "
         read -r newData
 
         # If the user leaves input blank, keep the existing data
@@ -91,7 +93,7 @@ updateTable() {
         fi
 
         # Validate new data
-        if [[ -z "$newData" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
+        if [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
             echo "'$col' can't be NULL."
             ((i--))
             continue
