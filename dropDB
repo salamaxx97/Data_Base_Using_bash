@@ -12,6 +12,10 @@ confirm_delete() {
 }
 dropDB(){
 while true; do
+    if [ -z "$(ls ./DataBases 2> /dev/null)" ];then
+      echo "there is no databases to drop"
+      exit
+    fi
     echo "Enter db name to drop or type 'exit' to return to the main menu"
     read -r DBname
     if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
