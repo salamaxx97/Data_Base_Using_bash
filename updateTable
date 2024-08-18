@@ -1,135 +1,101 @@
-#!/bin/bash
-
-updateTable () {
-  while true; do
+updateTable() {
+    local tableName=''
+    local primaryKey=''
+    local colLabel=''
+    local colType=''
+    local colIsNull=''
+    local dataLine=''
+    local newLine=''
+    local record=''
+    local updateOccurred=false
     tables=$(ls)
+    
     if  [ -z "$tables" ]; then
-           echo "there is no tables to update" ; exit
+        echo "There are no tables to update." ; exit
     fi
+
     read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
-    # check table name is correct and exists
+
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
-      exit
+        exit
     elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
-      exit
+        exit
     elif [ -z "$tableName" ]; then
-      echo "Table name can't be empty"
-      continue
+        echo "Table name can't be empty."
+        continue
     elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
-      echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
-      continue
+        echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+        continue
     elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
-      echo "Table '$tableName' doesn't exist or is corrupted"
-      exit 1
-    else # table founded
-      while true; do
-        echo "Choose an option:"
-        echo "1. Delete All Rows of '$tableName'"
-        echo "2. Delete Rows Based on Condition"
-        read -rp "Enter your choice (1 or 2 or exit): " choice
-        case $choice in
-          "1" )
-            read -rp "To confirm deletion of all rows in '$tableName', type (y) ? " confirm
-            case $confirm in
-              y|Y )
-                > "./$tableName" && echo "All rows deleted from '$tableName'" || echo "Failed to delete all rows in '$tableName' "
-                exit
-                ;;
-              * )
-                echo "Abort deletion"
-                exit
-                ;;
-            esac
-            ;;
-          "2" )
-            colLabel=$(head -1 "./$tableName.metadata")
-            echo "Labels: $colLabel"
-            read -rp "Enter the column name to match: " colName
-            if [[ -z $(echo "$colLabel" | grep -w $colName) ]]; then
-              echo "label '$colName' not founded"
-              continue
-            fi
-            # Abort if the given label not found in metadata first line
-
-            read -rp "Enter the value to match: " value
-            if [[ -z $value  ]]; then
-              value="NULL"
-            fi
-
-            if [[ -z $(grep -w $value "./$tableName") ]]; then
-              echo "value '$value' not founded"
-              continue
-            fi
-            # Checking value globally first
-
-            IFS=' '; read -r -a colLabel <<< "$colLabel" # converting labels to array to loop through
-            colNumber=0
-            for (( i = 0; i < ${#colLabel[@]} ; i++ )); do
-              # debugging code
-              # echo $colNumber
-              # echo ${colLabel[$i]}
-              # echo ${#colLabel[@]}
-              # echo ${colLabel[@]}
-              if [ "${colLabel[$i]}" = "$colName" ]; then
-                colNumber=$((i+1))
-                # echo $colNumber
-                break
-              fi
-            done
-            if [ $colNumber = 0 ]; then
-              echo "'$colName' column not found"
-              continue
-            fi
-            colData=$(cut -d, -f "$colNumber" "./$tableName")
-            # saving data of the targeted col in variable coldata
-            # echo $colData # debug
-            if [[ -z $(echo "$colData" | grep "^$value$") ]]; then
-              echo "$value not found"
-              continue
-            fi
-            # checking if value given exists in targeted column
-
-            rowNumbers=$(echo "$colData" | awk -v val="$value" 'BEGIN { ORS=" " } { if ($0 == val) print NR }')
-            # echo $rowNumbers #
-            # using awk to get number if rows their value equal to given value ORS is output record separator
-            command="sed"
-            rows=''
-            IFS=' '; read -r -a rowNumbers <<< "$rowNumbers"
-            # echo ${rowNumbers[@]} # debug
-            for i in "${rowNumbers[@]}"; do
-              command+=" -e '${i}d' "
-              # add every number to command se to delete
-              rows+="$(sed -n "${i}p" ./$tableName)"$'\n'
-              # add full rows to print them to user for confirmation
-            done
-            command+=" $tableName"
-            # echo $command # debug
-            eval "$command" > $tableName.opt
-            echo "Are you sure you want to delete these rows:"
-            echo "$rows"
-            read -rp "To confirm deletion of these rows in '$tableName', type (y) ? " confirm
-            case $confirm in
-              y|Y )
-                cat "./$tableName.opt" > "./$tableName" && echo "Rows number '$rowNumbers' deleted" && rm ./$tableName.opt || echo "Failed to delete"
-                ;;
-              * )
-                echo "Abort deletion"
-                rm ./$tableName.opt
-                continue
-                ;;
-            esac
-            ;;
-          "exit" )
-            exit
-            ;;
-          * )
-            echo "Invalid option"
-            continue
-            ;;
-        esac
-      done
+        echo "Table '$tableName' doesn't exist or is corrupted."
+        continue
     fi
-  done
+
+    colLabel=$(sed -n "1p" "./$tableName.metadata")
+    IFS=' '; read -r -a colLabel <<< "$colLabel"
+
+    colType=$(sed -n "2p" "./$tableName.metadata")
+    IFS=' '; read -r -a colType <<< "$colType"
+
+    colIsNull=$(sed -n "3p" "./$tableName.metadata")
+    IFS=' '; read -r -a colIsNull <<< "$colIsNull"
+
+    # Prompt user for primary key
+    read -rp "Enter the primary key value of the record you want to update: " primaryKey
+
+    # Find the record
+    record=$(grep "^$primaryKey," "./$tableName")
+    if [ -z "$record" ]; then
+        echo "No record found with primary key '$primaryKey'."
+        return 1
+    fi
+
+    IFS=',' ;read -r -a oldData <<< "$record"
+
+    for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
+        col=${colLabel[$i]}
+        echo -n "'$col' (${colType[$i]}) [current: ${oldData[$i]}]: "
+        read -r newData
+
+        # If the user leaves input blank, keep the existing data
+        if [ -z "$newData" ]; then
+            newData="${oldData[$i]}"
+        fi
+
+        # Validate new data
+        if [[ -z "$newData" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
+            echo "'$col' can't be NULL."
+            ((i--))
+            continue
+        elif [[ "${colType[$i]}" == "integer" && ! "$newData" =~ ^[0-9]*$  ]]; then
+            echo "Invalid data type for '$col'. Expected integer."
+            ((i--))
+            continue
+        elif [[ "${colType[$i]}" == "string" && ! "$newData" =~ ^[^,]*$ ]]; then
+            echo "Invalid data type for '$col'. Expected string without commas."
+            ((i--))
+            continue
+        fi
+
+        newLine+="$newData,"
+        updateOccurred=true
+    done
+
+    # Remove the trailing comma
+    newLine=${newLine%,}
+
+    if $updateOccurred; then
+        if confirmInsertion "$newLine" "$colLabel"; then
+            # Update the record in the file
+            sed -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
+            echo "Record with primary key '$primaryKey' updated successfully in '$tableName'."
+        else
+            echo "Update canceled."
+        fi
+    else
+        echo "No changes made."
+    fi
 }
 
+# To use the function, simply call it
 updateTable
