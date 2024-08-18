@@ -63,7 +63,7 @@ for (( i=0 ; i < $col ; i++ )); do
         if (( i == 0 )); then
             line3[${i}]="NOTNULL"
         else
-            read -p   "is '$colabel' can be null (y/n) " coltype
+            read -p   "'$colabel' can be null (y/n) ? " coltype
             case $coltype in
                 "y"|"Y" ) line3[${i}]="NULL" ;;
                 "n"|"N" ) line3[${i}]="NOTNULL" ;;
