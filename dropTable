@@ -13,6 +13,10 @@ confirm_delete () {
 dropTable() {
     while true; do
         tableName=''
+        if [ -z "$(ls)" ];then
+                  echo "there is no tables to drop"
+                  exit
+        fi
         read -rp "Enter Table Name to delete type (exit) to abort: " tableName
         if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
             exit
