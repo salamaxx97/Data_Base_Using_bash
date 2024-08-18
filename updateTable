@@ -1,0 +1,131 @@
+#!/bin/bash
+confirmInsertion() {
+    local templine=''
+    local prompt=''
+    local i=0
+    IFS=','; read -r -a templine <<< "$1"
+    IFS=' '; read -r -a ${colLabel[@]} <<< "$2"
+
+    for label in "${colLabel[@]}" ; do
+        prompt+="$label=${templine[$i]}\n"
+        ((i++))
+    done
+
+    while true ; do
+        echo -en "$prompt" #-e to print \n
+        echo -n "Confirm your data is correct (y/n): "
+        read -r var
+        case $var in
+            Y|y) echo "Data confirmed" ; return 0;;
+            N|n) echo "Operation aborted" ; return 1;;
+            *) echo "Invalid input, please enter (y/n)";;
+        esac
+    done
+}
+updateTable() {
+    local tableName=''
+    local primaryKey=''
+    local colLabel=''
+    local colType=''
+    local colIsNull=''
+    local dataLine=''
+    local newLine=''
+    local record=''
+    local updateOccurred=false
+    tables=$(ls)
+    
+    if  [ -z "$tables" ]; then
+        echo "There are no tables to update." ; exit
+    fi
+
+    read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
+
+    if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+        exit
+    elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+        exit
+    elif [ -z "$tableName" ]; then
+        echo "Table name can't be empty."
+        exit
+    elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+        echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+        exit
+    elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+        echo "Table '$tableName' doesn't exist or is corrupted."
+        exit
+    fi
+
+    colLabel=$(sed -n "1p" "./$tableName.metadata")
+    IFS=' '; read -r -a colLabel <<< "$colLabel"
+
+    colType=$(sed -n "2p" "./$tableName.metadata")
+    IFS=' '; read -r -a colType <<< "$colType"
+
+    colIsNull=$(sed -n "3p" "./$tableName.metadata")
+    IFS=' '; read -r -a colIsNull <<< "$colIsNull"
+
+    # Prompt user for primary key
+    read -rp "Enter the primary key value of the record you want to update: " primaryKey
+
+    # Find the record
+    if [ -z $primaryKey ]; then
+      echo "primary Key can't be NULL"
+      exit
+    fi
+    record=$(grep "^$primaryKey," "./$tableName")
+    if [ -z "$record" ]; then
+        echo "No record found with primary key '$primaryKey'."
+        return 1
+    fi
+
+    IFS=',' ;read -r -a oldData <<< "$record"
+
+    for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
+        col=${colLabel[$i]}
+        echo "Press Enter to keep old value"
+        exho "Type NULL to set $col's value to NULL"
+        echo -n "'$col' (${colType[$i]}) (${colIsNull[$i]})  [current: ${oldData[$i]}]: "
+        read -r newData
+
+        # If the user leaves input blank, keep the existing data
+        if [ -z "$newData" ]; then
+            newData="${oldData[$i]}"
+        fi
+
+        # Validate new data
+        if [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
+            echo "'$col' can't be NULL."
+            ((i--))
+            continue
+        elif [[ "${colType[$i]}" == "integer" && ! "$newData" =~ ^[0-9]*$  ]]; then
+            echo "Invalid data type for '$col'. Expected integer."
+            ((i--))
+            continue
+        elif [[ "${colType[$i]}" == "string" && ! "$newData" =~ ^[^,]*$ ]]; then
+            echo "Invalid data type for '$col'. Expected string without commas."
+            ((i--))
+            continue
+        fi
+
+        newLine+="$newData,"
+        updateOccurred=true
+    done
+
+    # Remove the trailing comma
+    newLine=${newLine%,}
+
+    if $updateOccurred; then
+        if confirmInsertion "$newLine" "${colLabel[@]}"; then
+            # Update the record in the file
+            sed  -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
+            echo "Record with primary key '$primaryKey' updated successfully in '$tableName'."
+        else
+            echo "Update canceled."
+        fi
+    else
+        echo "No changes made."
+    fi
+}
+
+# To use the function, simply call it
+updateTable

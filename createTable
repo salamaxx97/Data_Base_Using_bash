@@ -1,7 +1,7 @@
 #!/bin/bash
 
 tableName=''
-while [ true ]; do
+while  true ; do
     read -rp "Enter Table Name you want to create or type 'exit' to exit: " tableName
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
         exit
@@ -47,7 +47,7 @@ for (( i=0 ; i < $col ; i++ )); do
         echo "Invalid column name it must start with a letter and only contains letter numbers and underscores"
         ((i--))
         continue
-    elif [[ " ${line1[@]} " =~ " ${colabel} " ]] ; then
+    elif [[ "${line1[*]}" =~ ${colabel} ]] ; then
         echo "'$colabel' already exists "
         ((i--))
         continue
@@ -74,7 +74,7 @@ for (( i=0 ; i < $col ; i++ )); do
 done
 
 touch  $tableName
-echo ${line1[@]} > ./$tableName.metadata
-echo ${line2[@]} >> ./$tableName.metadata
-echo ${line3[@]} >> ./$tableName.metadata
+echo "${line1[@]}" > ./$tableName.metadata
+echo "${line2[@]}" >> ./$tableName.metadata
+echo "${line3[@]}" >> ./$tableName.metadata
 echo "Table '$tableName' created successfully."
