@@ -34,7 +34,7 @@ createTable () {
 
 dropTable () {
 
-../../dropTable
+../../dropTable $1
 
 }
 
@@ -73,9 +73,9 @@ connectDB () {
       return
     fi
     case $task in
-      "Create Table" ) createTable $DBname ;;
-      "List Tables" ) listTables $DBname ;;
-      "Drop Table"  ) dropTable ;;
+      "Create Table" ) createTable "$DBname" ;;
+      "List Tables" ) listTables "$DBname" ;;
+      "Drop Table"  ) dropTable "$DBname" ;;
       "Insert into Table" ) insertIntoTable ;;
       "Select From Table" ) selectFromTable ;;
       "Delete From Table" ) deleteFromTable ;;
