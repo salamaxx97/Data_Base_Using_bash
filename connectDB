@@ -2,24 +2,28 @@
 checkDB(){
   while [ true ]
     do
+      echo  "-----------------------------------------"
       dbs=$(ls -F DataBases)
       if ! [ -d DataBases ] || [ -z "$dbs" ]; then
         echo "there is no Database to connect " ; exit
       fi
-      echo "Enter db name to connect or type 'back' to return to the main menu"
+      echo "Enter db name to connect or type 'back' or 'exit' to return to the main menu"
       read -r DBname
       if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
           echo "Back to main menu"
+          echo  "-----------------------------------------"
           exit
       elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
-                  exit
+          echo  "-----------------------------------------"
+          exit
       elif ! [[ "$DBname" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
           echo "Invalid DB Name" ;
       elif ! [ -d "./DataBases/$DBname" ]; then
           echo "Database '$DBname' doesn't exist" ;
       elif [ -d "./DataBases/$DBname" ]; then
             cd "./DataBases/$DBname" && echo "Successfully connected to '$DBname' " || echo "Failed to connect to $DBname"
-            break
+            echo  "-----------------------------------------"
+            return 0
       fi
   done
 
@@ -58,11 +62,15 @@ updateTable (){
 
 connectDB () {
   checkDB
-  PS3="'$DBname' >> choose your option or press enter to show options again: "
+  PS3="Connected to DB '$DBname' >> choose your option or press enter to show options again: "
   select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
   do
-    if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then exit
-    elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then exit
+    if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then
+      echo  "-----------------------------------------"
+      return
+    elif [[ "$REPLY" =~ ^[eE][xX][iI][tT]$  ]]; then
+      echo  "-----------------------------------------"
+      return
     fi
     case $task in
       "Create Table" ) createTable  ;;
