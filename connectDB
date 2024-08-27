@@ -3,9 +3,10 @@ checkDB(){
   while [ true ]
     do
       echo  "-----------------------------------------"
-      dbs=$(ls -F DataBases)
+      dbs=$(ls -F DataBases 2> /dev/null)
       if ! [ -d DataBases ] || [ -z "$dbs" ]; then
-        echo "there is no Database to connect " ; exit
+        echo "there is no Database to connect "
+        echo  "-----------------------------------------"; exit
       fi
       echo "Enter db name to connect or type 'back' or 'exit' to return to the main menu"
       read -r DBname
@@ -29,25 +30,25 @@ checkDB(){
 
 }
 createTable () {
-../../createTable $1
+../../createTable "$1"
 }
 
 dropTable () {
 
-../../dropTable $1
+../../dropTable "$1"
 
 }
 
 listTables () {
-../../listTables $1
+../../listTables "$1"
 }
 
 insertIntoTable () {
-../../insertIntoTable
+../../insertIntoTable "$1"
 }
 
 selectFromTable () {
-../../selectFromTable
+../../selectFromTable $1
 }
 
 deleteFromTable (){
@@ -76,8 +77,8 @@ connectDB () {
       "Create Table" ) createTable "$DBname" ;;
       "List Tables" ) listTables "$DBname" ;;
       "Drop Table"  ) dropTable "$DBname" ;;
-      "Insert into Table" ) insertIntoTable ;;
-      "Select From Table" ) selectFromTable ;;
+      "Insert into Table" ) insertIntoTable "$DBname" ;;
+      "Select From Table" ) selectFromTable "$DBname" ;;
       "Delete From Table" ) deleteFromTable ;;
       "Update Table"  ) updateTable ;;
       "back to main" ) exit ;;

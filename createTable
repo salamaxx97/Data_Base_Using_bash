@@ -3,7 +3,7 @@ confirmCreation(){
   while true ; do
           echo  "-----------------------------------------"
           for (( i=0; i<${#line1[@]}; i++ )); do
-                  echo "$((i+1)))"${line1[$i]}":"${line2[$i]}":"${line3[$i]}""
+                  echo "$((i+1)))"${line1[$i]}" : "${line2[$i]}" : "${line3[$i]}""
           done
           echo  "-----------------------------------------"
           echo -n "Are you sure you want to create Table '$1' (y/n): "
