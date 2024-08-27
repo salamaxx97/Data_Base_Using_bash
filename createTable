@@ -95,7 +95,7 @@ for (( i=0 ; i < $col ; i++ )); do
         line1[${i}]="$colabel"
     fi
 done
-if ! confirmCreation "$tableName" "${line1[@]}" "${line2[@]}" "${line3[@]}"  ;then
+if ! confirmCreation "$tableName" ;then
   echo  "-----------------------------------------"
   exit
 fi
@@ -106,3 +106,4 @@ echo "${line2[@]}" >> ./$tableName.metadata
 echo "${line3[@]}" >> ./$tableName.metadata
 echo "Table '$tableName' created successfully."
 echo  "-----------------------------------------"
+#should handle error in creation
