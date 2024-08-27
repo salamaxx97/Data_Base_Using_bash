@@ -9,7 +9,7 @@ createDB (){
       echo "back to main";break
     elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
             exit
-     elif [ -z $DBname  ]; then echo "Database name can't be empty" ;continue
+     elif [ -z "$DBname"  ]; then echo "Database name can't be empty" ;continue
      elif ! [[ "$DBname" =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
            echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
      elif [ -d ./DataBases/$DBname ] ; then echo "Database '$DBname' Already exists"
