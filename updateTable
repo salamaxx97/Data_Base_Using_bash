@@ -1,4 +1,14 @@
 #!/bin/bash
+isUnique (){
+   #$1 is table name $2 is data
+   occ=$(cut -f1 -d, "$1" | grep "^$2$")
+   if [ -z $occ ];then
+     return 0
+   else
+     return 1
+    fi
+
+}
 confirmInsertion() {
     local templine=''
     local prompt=''
@@ -73,6 +83,7 @@ updateTable() {
       exit
     fi
     record=$(grep "^$primaryKey," "./$tableName")
+
     if [ -z "$record" ]; then
         echo "No record found with primary key '$primaryKey'."
         return 1
@@ -94,6 +105,13 @@ updateTable() {
             newLine+="$newData,"
             continue
         fi
+
+        if [[ $i = 0 ]] && ! isUnique "$tableName" "$newData" ;then
+          echo "primaryKey must be unique"
+          ((i--))
+          continue
+        fi
+
 
         # Validate new data
         if [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
