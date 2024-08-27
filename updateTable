@@ -41,9 +41,9 @@ updateTable() {
     read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
 
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
-        exit
+        return
     elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
-        exit
+        return
     elif [ -z "$tableName" ]; then
         echo "Table name can't be empty."
         exit
@@ -84,12 +84,15 @@ updateTable() {
         col=${colLabel[$i]}
         echo "Press Enter to keep old value"
         echo "Type NULL to set $col's value to NULL"
+        echo "---------------------------------"
         echo -n "'$col' (${colType[$i]}) (${colIsNull[$i]})  [current: ${oldData[$i]}]: "
         read -r newData
-
+        echo "---------------------------------"
         # If the user leaves input blank, keep the existing data
-        if [ -z "$newData" ]; then
+        if [[ -z "$newData" || "$newData" = "${oldData[$i]}" ]]; then
             newData="${oldData[$i]}"
+            newLine+="$newData,"
+            continue
         fi
 
         # Validate new data
@@ -97,6 +100,8 @@ updateTable() {
             echo "'$col' can't be NULL."
             ((i--))
             continue
+        elif [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NULL" ]]; then
+                    break
         elif [[ "${colType[$i]}" == "integer" && ! "$newData" =~ ^[0-9]*$  ]]; then
             echo "Invalid data type for '$col'. Expected integer."
             ((i--))
@@ -117,8 +122,11 @@ updateTable() {
     if $updateOccurred; then
         if confirmInsertion "$newLine" "${colLabel[@]}"; then
             # Update the record in the file
-            sed  -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
+            sed "s/^$primaryKey,.*/$newLine/" "./$tableName" > $tableName.tmp
+            cat $tableName.tmp > $tableName
+            rm  $tableName.tmp
             echo "Record with primary key '$primaryKey' updated successfully in '$tableName'."
+
         else
             echo "Update canceled."
         fi
