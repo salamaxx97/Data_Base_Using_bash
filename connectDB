@@ -52,11 +52,11 @@ selectFromTable () {
 }
 
 deleteFromTable (){
-../../deleteFromTable
+../../deleteFromTable $1
 }
 
 updateTable (){
-../../updateTable
+../../updateTable $1
 }
 
 
@@ -79,8 +79,8 @@ connectDB () {
       "Drop Table"  ) dropTable "$DBname" ;;
       "Insert into Table" ) insertIntoTable "$DBname" ;;
       "Select From Table" ) selectFromTable "$DBname" ;;
-      "Delete From Table" ) deleteFromTable ;;
-      "Update Table"  ) updateTable ;;
+      "Delete From Table" ) deleteFromTable "$DBname" ;;
+      "Update Table"  ) updateTable "$DBname" ;;
       "back to main" ) exit ;;
       * ) echo "Invalid option Try Again" ;;
 
