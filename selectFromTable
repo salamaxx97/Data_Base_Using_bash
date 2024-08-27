@@ -1,0 +1,49 @@
+#!/bin/bash
+
+selectFromTable() {
+    tables=$(ls)
+    while true ;do
+        if  [ -z "$tables" ]; then
+                echo "there is no tables to select from it " ; exit
+        fi
+        read -rp "Enter Table Name you want to select from (type 'exit' to abort): " tableName
+
+        if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            return
+        elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            return
+        elif [ -z "$tableName" ]; then
+            echo "Table name can't be empty"
+            continue
+        elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+            echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+            continue
+        elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+            echo "Table '$tableName' doesn't exist or is corrupted"
+            continue
+        fi
+      colLabel=$(sed -n "1p" "./$tableName.metadata")
+      IFS=' '; read -r -a colLabel <<< "$colLabel"
+      # Display table header
+      echo "Selecting from table '$tableName':"
+      echo "---------------------------------"
+
+      for (( i=0; i<${#colLabel[@]}; i++ )); do
+              printf "%-15s" "${colLabel[$i]}"
+      done
+      echo
+      echo "---------------------------------"
+      # Print data rows
+      while IFS=, read -r -a rowData; do
+          for (( i=0; i<${#rowData[@]}; i++ )); do
+              printf "%-15s" "${rowData[$i]}"
+          done
+          echo
+      done < "$tableName"
+
+      echo "---------------------------------"
+      return 0
+done
+}
+
+selectFromTable
