@@ -8,7 +8,7 @@ confirmCreation(){
               N|n) echo "Creation aborted" ; return 1;;
               *) echo "Invalid input, please enter (y/n)";;
           esac
-      done
+  done
 }
 createDB (){
     while [ true ]
