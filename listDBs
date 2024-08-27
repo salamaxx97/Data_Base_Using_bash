@@ -6,17 +6,18 @@ listDBs() {
     if [ -z "$dbs" ]; then
       echo "No databases found."
     else
+      echo "---------------------------------"
       echo "Databases in DataBases directory:"
       #loop to remove slash
       for i in $dbs
       do
         echo ${i%/}
-        #echo ${i[@]:0:${#i}-1}
       done
     fi
   else
     echo "DataBases directory not found."
   fi
+  echo "---------------------------------"
 }
 
 listDBs

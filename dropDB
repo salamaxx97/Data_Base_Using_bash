@@ -12,17 +12,21 @@ confirm_delete() {
 }
 dropDB(){
 while true; do
+    echo  "-----------------------------------------"
     if [ -z "$(ls ./DataBases 2> /dev/null)" ];then
       echo "there is no databases to drop"
+      echo "-----------------------------------------"
       exit
     fi
     echo "Enter db name to drop or type 'exit' to return to the main menu"
     read -r DBname
     if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$ ]]; then
         echo "Back to main menu"
-        break
+        echo "-----------------------------------------"
+        return
     elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
-                exit
+        echo "-----------------------------------------"
+        return
     elif ! [[ "$DBname" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
         echo "Invalid DB Name"
     elif ! [ -d "./DataBases/$DBname" ]; then
@@ -33,6 +37,7 @@ while true; do
         else
             echo "Deletion of DB '$DBname' canceled"
         fi
+        echo "-----------------------------------------"
         break
     fi
 done
