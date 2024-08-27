@@ -28,8 +28,8 @@ while [ true ]; do
     elif ! [[ $col =~ ^[0-9]*$ ]]; then
         echo "that's not a number"
         continue
-    elif (( $col > 64 || $col <= 0 )); then
-        echo "columns must be an integer between 1 And 64"
+    elif (( $col > 10 || $col <= 0 )); then
+        echo "number of columns must be an integer between 1 And 10"
         continue
     else
         break

@@ -47,24 +47,27 @@ updateTable() {
     if  [ -z "$tables" ]; then
         echo "There are no tables to update." ; exit
     fi
+    while true ; do
+        read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
 
-    read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
+        if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            return
+        elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            return
+        elif [ -z "$tableName" ]; then
+            echo "Table name can't be empty."
+            continue
+        elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+            echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+            continue
+        elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+            echo "Table '$tableName' doesn't exist or is corrupted."
+            continue
+        else
+            break
+        fi
 
-    if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
-        return
-    elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
-        return
-    elif [ -z "$tableName" ]; then
-        echo "Table name can't be empty."
-        exit
-    elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
-        echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
-        exit
-    elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
-        echo "Table '$tableName' doesn't exist or is corrupted."
-        exit
-    fi
-
+    done
     colLabel=$(sed -n "1p" "./$tableName.metadata")
     IFS=' '; read -r -a colLabel <<< "$colLabel"
 
