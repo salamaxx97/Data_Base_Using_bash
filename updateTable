@@ -83,7 +83,7 @@ updateTable() {
     for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
         col=${colLabel[$i]}
         echo "Press Enter to keep old value"
-        exho "Type NULL to set $col's value to NULL"
+        echo "Type NULL to set $col's value to NULL"
         echo -n "'$col' (${colType[$i]}) (${colIsNull[$i]})  [current: ${oldData[$i]}]: "
         read -r newData
 
