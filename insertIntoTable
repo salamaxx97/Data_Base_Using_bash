@@ -22,7 +22,9 @@ confirmInsertion() {
     done
 
     while true ; do
-        echo -en "$prompt" #-e to print \n
+        echo  "-----------------------------------------"
+        echo -en "$prompt" #-e to understand  \n
+        echo  "-----------------------------------------"
         echo -n "Confirm your data is correct (y/n): "
         read -r var
         case $var in
@@ -31,10 +33,13 @@ confirmInsertion() {
             *) echo "Invalid input, please enter (y/n)";;
         esac
     done
+    echo  "-----------------------------------------"
+
 }
 
 insertIntoTable() {
     while true; do
+        echo  "-----------------------------------------"
         local tableName=''
         local colLabel=''
         local colType=''
@@ -42,13 +47,16 @@ insertIntoTable() {
         local dataLine=''
         tables=$(ls)
         if  [ -z "$tables" ]; then
-                echo "there is no tables to insert into " ; exit
+                echo "there is no tables to insert into "
+                echo  "-----------------------------------------" ; exit
         fi
-        read -rp "Enter Table Name you want to insert into (type 'exit' to abort): " tableName
+        read -rp "**$1** Enter Table Name you want to insert into (type 'exit' to return to DB dashboard): " tableName
 
         if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            echo  "-----------------------------------------"
             exit
         elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            echo  "-----------------------------------------"
             exit
         elif [ -z "$tableName" ]; then
             echo "Table name can't be empty"
@@ -58,7 +66,7 @@ insertIntoTable() {
             continue
         elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
             echo "Table '$tableName' doesn't exist or is corrupted"
-            exit 1
+            continue 1
         else
             colLabel=$(sed -n "1p" "./$tableName.metadata")
             IFS=' '; read -r -a colLabel <<< "$colLabel"
@@ -104,14 +112,14 @@ insertIntoTable() {
             colLabel=$(sed -n "1p" "./$tableName.metadata")
 
             if confirmInsertion "$dataLine" "$colLabel"; then
-                echo "$dataLine" >> "./$tableName"
-                echo "Data inserted successfully into '$tableName'"
+                echo "$dataLine" >> "./$tableName"  && echo "Data inserted successfully into '$tableName'" || echp "Failed to insert"
             else
                 echo "Insert canceled"
+                echo  "-----------------------------------------"
                 exit 1
             fi
         fi
     done
 }
 
-insertIntoTable
+insertIntoTable "$1"

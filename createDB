@@ -1,22 +1,38 @@
 #!/bin/bash
-
+confirmCreation(){
+  while true ; do
+          echo -n "Are you sure you want to create DB '$1' (y/n): "
+          read -r var
+          case $var in
+              Y|y) echo "Confirmed" ; return 0;;
+              N|n) echo "Creation aborted" ; return 1;;
+              *) echo "Invalid input, please enter (y/n)";;
+          esac
+  done
+}
 createDB (){
     while [ true ]
     do
+     echo  "-----------------------------------------"
      echo  "Enter Name of database to be created type 'exit' to return to main menu"
      read -r DBname
      if [[ "$DBname" =~ ^[Bb][aA][cC][Kk]$  ]] ; then
-      echo "back to main";break
+      echo "back to main"
+      echo  "-----------------------------------------";return
     elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
-            exit
+            echo  "-----------------------------------------";return
      elif [ -z "$DBname"  ]; then echo "Database name can't be empty" ;continue
      elif ! [[ "$DBname" =~  ^[a-zA-Z][A-Za-z_0-9]*$ ]] ; then
-           echo "Invalid DB Name it must start with a letter and only contains letter numbers and underscores"
-     elif [ -d ./DataBases/$DBname ] ; then echo "Database '$DBname' Already exists"
+           echo "Invalid DB Name it must start with a letter and only contains letters, numbers and underscores"
+     elif [ -d ./DataBases/$DBname ] ; then
+       echo "Database '$DBname' Already exists"
      else
+      if  confirmCreation $DBname ;then
       mkdir -p ./DataBases/$DBname  && echo "database '$DBname' created" || echo "Failed to create database '%DBname'\n"
-      break
+      echo  "-----------------------------------------"
+      return
       fi
+    fi
     done
 }
 createDB

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 listTables() {
+  echo  "-----------------------------------------"
   tables=$( ls | grep -v .metadata )
   if [ -z "$tables" ]; then
     echo "No Tables found."
@@ -8,7 +9,7 @@ listTables() {
       echo "Tables in '$1' DataBase : "
       echo "$tables"
   fi
-
+  echo  "-----------------------------------------"
 }
 
 listTables "$1"

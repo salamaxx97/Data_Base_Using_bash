@@ -2,15 +2,18 @@
 
 deleteFromTable () {
   while true; do
+    echo  "-----------------------------------------"
     tables=$(ls)
     if  [ -z "$tables" ]; then
            echo "there is no tables to delete from it " ; exit
     fi
-    read -rp "Enter Table Name you want to delete from (type 'exit' to abort): " tableName
+    read -rp "**$1** Enter Table Name you want to delete from (type 'exit' to abort): " tableName
     # check table name is correct and exists
     if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+      echo  "-----------------------------------------"
       exit
     elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+      echo  "-----------------------------------------"
       exit
     elif [ -z "$tableName" ]; then
       echo "Table name can't be empty"
@@ -20,7 +23,7 @@ deleteFromTable () {
       continue
     elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
       echo "Table '$tableName' doesn't exist or is corrupted"
-      exit 1
+      continue
     else # table founded
       while true; do
         echo "Choose an option:"
@@ -33,10 +36,12 @@ deleteFromTable () {
             case $confirm in
               y|Y )
                 > "./$tableName" && echo "All rows deleted from '$tableName'" || echo "Failed to delete all rows in '$tableName' "
+                echo  "-----------------------------------------"
                 exit
                 ;;
               * )
                 echo "Abort deletion"
+                echo  "-----------------------------------------"
                 exit
                 ;;
             esac
@@ -44,9 +49,10 @@ deleteFromTable () {
           "2" )
             colLabel=$(head -1 "./$tableName.metadata")
             echo "Labels: $colLabel"
-            read -rp "Enter the column name to match: " colName
+            read -rp "Enter the column label to match: " colName
             if [[ -z $(echo "$colLabel" | grep -w $colName) ]]; then
               echo "label '$colName' not founded"
+              echo  "-----------------------------------------"
               continue
             fi
             # Abort if the given label not found in metadata first line
@@ -58,6 +64,7 @@ deleteFromTable () {
 
             if [[ -z $(grep -w $value "./$tableName") ]]; then
               echo "value '$value' not founded"
+              echo  "-----------------------------------------"
               continue
             fi
             # Checking value globally first
@@ -78,6 +85,7 @@ deleteFromTable () {
             done
             if [ $colNumber = 0 ]; then
               echo "'$colName' column not found"
+              echo  "-----------------------------------------"
               continue
             fi
             colData=$(cut -d, -f "$colNumber" "./$tableName")
@@ -85,6 +93,7 @@ deleteFromTable () {
             # echo $colData # debug
             if [[ -z $(echo "$colData" | grep "^$value$") ]]; then
               echo "$value not found"
+              echo  "-----------------------------------------"
               continue
             fi
             # checking if value given exists in targeted column
@@ -98,32 +107,38 @@ deleteFromTable () {
             # echo ${rowNumbers[@]} # debug
             for i in "${rowNumbers[@]}"; do
               command+=" -e '${i}d' "
-              # add every number to command se to delete
+              # add every number to command sed to delete
               rows+="$(sed -n "${i}p" ./$tableName)"$'\n'
               # add full rows to print them to user for confirmation
             done
             command+=" $tableName"
             # echo $command # debug
-            eval "$command" > $tableName.opt
+            eval "$command" > $tableName.tmp
             echo "Are you sure you want to delete these rows:"
+            echo  "-----------------------------------------"
             echo "$rows"
+            echo  "-----------------------------------------"
             read -rp "To confirm deletion of these rows in '$tableName', type (y) ? " confirm
             case $confirm in
               y|Y )
-                cat "./$tableName.opt" > "./$tableName" && echo "Rows number '$rowNumbers' deleted" && rm ./$tableName.opt || echo "Failed to delete"
+                cat "./$tableName.tmp" > "./$tableName" && echo "Rows number '${rowNumbers[@]}' deleted" && rm ./$tableName.tmp || echo "Failed to delete"
+                echo  "-----------------------------------------"
                 ;;
               * )
                 echo "Abort deletion"
-                rm ./$tableName.opt
+                rm ./$tableName.tmp
+                echo  "-----------------------------------------"
                 continue
                 ;;
             esac
             ;;
           "exit" )
+            echo  "-----------------------------------------"
             exit
             ;;
           * )
             echo "Invalid option"
+            echo  "-----------------------------------------"
             continue
             ;;
         esac
@@ -132,4 +147,4 @@ deleteFromTable () {
   done
 }
 
-deleteFromTable
+deleteFromTable $1

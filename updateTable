@@ -1,10 +1,21 @@
 #!/bin/bash
+isUnique (){
+   #$1 is table name $2 is PK value
+   occ=$(cut -f1 -d, "$1" | grep "^$2$")
+   if [ -z $occ ];then
+     return 0
+   else
+     return 1
+    fi
+
+}
 confirmInsertion() {
     local templine=''
     local prompt=''
+    local colLabel=''
     local i=0
     IFS=','; read -r -a templine <<< "$1"
-    IFS=' '; read -r -a ${colLabel[@]} <<< "$2"
+    IFS=' '; read -r -a colLabel <<< "$2"
 
     for label in "${colLabel[@]}" ; do
         prompt+="$label=${templine[$i]}\n"
@@ -12,7 +23,9 @@ confirmInsertion() {
     done
 
     while true ; do
-        echo -en "$prompt" #-e to print \n
+        echo  "-----------------------------------------"
+        echo -en "$prompt" #-e to understand \n
+        echo  "-----------------------------------------"
         echo -n "Confirm your data is correct (y/n): "
         read -r var
         case $var in
@@ -35,26 +48,31 @@ updateTable() {
     tables=$(ls)
     
     if  [ -z "$tables" ]; then
-        echo "There are no tables to update." ; exit
+        echo "There are no tables to update."
+        echo  "-----------------------------------------"; exit
     fi
+    while true ; do
+        echo  "-----------------------------------------"
+        read -rp "**$1** Enter Table Name you want to update (type 'exit' to abort): " tableName
 
-    read -rp "Enter Table Name you want to update (type 'exit' to abort): " tableName
+        if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            return
+        elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            return
+        elif [ -z "$tableName" ]; then
+            echo "Table name can't be empty."
+            continue
+        elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
+            echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
+            continue
+        elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
+            echo "Table '$tableName' doesn't exist or is corrupted."
+            continue
+        else
+            break
+        fi
 
-    if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
-        exit
-    elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
-        exit
-    elif [ -z "$tableName" ]; then
-        echo "Table name can't be empty."
-        exit
-    elif ! [[ "$tableName" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
-        echo "Invalid table name. It must start with a letter and only contain letters, numbers, and underscores."
-        exit
-    elif ! [ -f "./$tableName" ] || ! [ -f "./$tableName.metadata" ]; then
-        echo "Table '$tableName' doesn't exist or is corrupted."
-        exit
-    fi
-
+    done
     colLabel=$(sed -n "1p" "./$tableName.metadata")
     IFS=' '; read -r -a colLabel <<< "$colLabel"
 
@@ -66,15 +84,17 @@ updateTable() {
 
     # Prompt user for primary key
     read -rp "Enter the primary key value of the record you want to update: " primaryKey
-
     # Find the record
     if [ -z $primaryKey ]; then
       echo "primary Key can't be NULL"
-      exit
+      echo  "-----------------------------------------"
+      return 1
     fi
     record=$(grep "^$primaryKey," "./$tableName")
+
     if [ -z "$record" ]; then
         echo "No record found with primary key '$primaryKey'."
+        echo  "-----------------------------------------"
         return 1
     fi
 
@@ -82,21 +102,32 @@ updateTable() {
 
     for (( i=0 ; i < ${#colLabel[@]} ; i++ )); do
         col=${colLabel[$i]}
+        echo "---------------------------------"
         echo "Press Enter to keep old value"
-        exho "Type NULL to set $col's value to NULL"
+        echo "Type NULL to set $col's value to NULL"
         echo -n "'$col' (${colType[$i]}) (${colIsNull[$i]})  [current: ${oldData[$i]}]: "
         read -r newData
-
         # If the user leaves input blank, keep the existing data
-        if [ -z "$newData" ]; then
+        if [[ -z "$newData" || "$newData" = "${oldData[$i]}" ]]; then
             newData="${oldData[$i]}"
+            newLine+="$newData,"
+            continue
         fi
+
+        if [[ $i = 0 ]] && ! isUnique "$tableName" "$newData" ;then
+          echo "ERROR PrimaryKey must be unique"
+          ((i--))
+          continue
+        fi
+
 
         # Validate new data
         if [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NOTNULL" ]]; then
-            echo "'$col' can't be NULL."
+            echo "ERROR column '$col' can't be NULL."
             ((i--))
             continue
+        elif [[ "$newData" == "NULL" && "${colIsNull[$i]}" == "NULL" ]]; then
+                    break
         elif [[ "${colType[$i]}" == "integer" && ! "$newData" =~ ^[0-9]*$  ]]; then
             echo "Invalid data type for '$col'. Expected integer."
             ((i--))
@@ -113,19 +144,25 @@ updateTable() {
 
     # Remove the trailing comma
     newLine=${newLine%,}
-
+    IFS=' '; read -r colLabel <<< "${colLabel[@]}"
     if $updateOccurred; then
-        if confirmInsertion "$newLine" "${colLabel[@]}"; then
+        if confirmInsertion "$newLine" "${colLabel}"; then
             # Update the record in the file
-            sed  -i "s/^$primaryKey,.*/$newLine/" "./$tableName"
+            sed "s/^$primaryKey,.*/$newLine/" "./$tableName" > $tableName.tmp
+            cat $tableName.tmp > $tableName
+            rm  $tableName.tmp
             echo "Record with primary key '$primaryKey' updated successfully in '$tableName'."
+            echo "---------------------------------"
+
         else
             echo "Update canceled."
+            echo "---------------------------------"
         fi
     else
         echo "No changes made."
+        echo "---------------------------------"
     fi
 }
 
 # To use the function, simply call it
-updateTable
+updateTable $1

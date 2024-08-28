@@ -3,14 +3,18 @@
 selectFromTable() {
     tables=$(ls)
     while true ;do
+        echo "---------------------------------"
         if  [ -z "$tables" ]; then
-                echo "there is no tables to select from it " ; exit
+                echo "there is no tables to select from it "
+                echo "---------------------------------"; exit
         fi
-        read -rp "Enter Table Name you want to select from (type 'exit' to abort): " tableName
+        read -rp "**$1** Enter Table Name you want to select from (type 'exit' to return to DB dashboard): " tableName
 
         if [[ "$tableName" =~ ^[Bb][aA][cC][Kk]$ ]]; then
+            echo "---------------------------------"
             return
         elif [[ "$tableName" =~ ^[eE][xX][iI][tT]$ ]]; then
+            echo "---------------------------------"
             return
         elif [ -z "$tableName" ]; then
             echo "Table name can't be empty"
@@ -26,24 +30,24 @@ selectFromTable() {
       IFS=' '; read -r -a colLabel <<< "$colLabel"
       # Display table header
       echo "Selecting from table '$tableName':"
-      echo "---------------------------------"
+      echo "------------------------------------------------------------------------------------"
 
       for (( i=0; i<${#colLabel[@]}; i++ )); do
-              printf "%-15s" "${colLabel[$i]}"
+              printf "%-25s" "${colLabel[$i]}"
       done
       echo
-      echo "---------------------------------"
+      echo "------------------------------------------------------------------------------------"
       # Print data rows
       while IFS=, read -r -a rowData; do
           for (( i=0; i<${#rowData[@]}; i++ )); do
-              printf "%-15s" "${rowData[$i]}"
+              printf "%-25s" "${rowData[$i]}"
           done
           echo
       done < "$tableName"
 
-      echo "---------------------------------"
+      echo "------------------------------------------------------------------------------------"
       return 0
 done
 }
 
-selectFromTable
+selectFromTable $1
