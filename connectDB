@@ -63,7 +63,7 @@ updateTable (){
 
 connectDB () {
   checkDB
-  PS3="Connected to DB '$DBname' || choose your option or press enter to show options again: "
+  PS3="Connected to DB '$DBname' || choose your option or press Enter to show options again: "
   select task in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select From Table" "Delete From Table" "Update Table" "back to main"
   do
     if [[ "$REPLY" =~ ^[Bb][aA][cC][Kk]$  ]]; then

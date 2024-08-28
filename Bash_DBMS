@@ -6,7 +6,7 @@ cd "$(dirname "$BASH_SOURCE")" || exit
 
 #enable extended regex
 shopt -s extglob
-PS3="**MAIN MENU** choose your option or press enter to show options again:  "
+PS3="**MAIN MENU** choose your option or press Enter to show options again:  "
 select task in createDB listDBs connectDB dropDB exit
 do
   PS3="**MAIN MENU** choose your option or press enter to show options again:  "
