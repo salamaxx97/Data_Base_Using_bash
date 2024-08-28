@@ -5,7 +5,8 @@ deleteFromTable () {
     echo  "-----------------------------------------"
     tables=$(ls)
     if  [ -z "$tables" ]; then
-           echo "there is no tables to delete from it " ; exit
+           echo "there is no tables to delete from it "
+           echo  "-----------------------------------------"; exit
     fi
     read -rp "**$1** Enter Table Name you want to delete from (type 'exit' to abort): " tableName
     # check table name is correct and exists

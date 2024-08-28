@@ -48,6 +48,7 @@ updateTable() {
     tables=$(ls)
     
     if  [ -z "$tables" ]; then
+        echo  "-----------------------------------------"
         echo "There are no tables to update."
         echo  "-----------------------------------------"; exit
     fi
