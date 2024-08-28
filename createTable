@@ -60,7 +60,7 @@ done
 echo "Enter your columns labels Note 1st is the primary key  : "
 for (( i=0 ; i < $col ; i++ )); do
     echo  "-----------------------------------------"
-    read -p "Enter col number $((i+1)) label: " colabel
+    read -rp "Enter col number $((i+1)) label: " colabel
     if [ -z "$colabel" ]; then
         echo "Columns label can't be empty"
         ((i--))
