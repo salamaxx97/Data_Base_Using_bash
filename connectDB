@@ -17,6 +17,7 @@ checkDB(){
       elif [[ "$DBname" =~ ^[eE][xX][iI][tT]$  ]] ; then
           echo  "-----------------------------------------"
           exit
+      elif [ -z "$DBname"  ]; then echo "Database name can't be empty" ;continue
       elif ! [[ "$DBname" =~ ^[a-zA-Z][A-Za-z_0-9]*$ ]]; then
           echo "Invalid DB Name" ;
       elif ! [ -d "./DataBases/$DBname" ]; then
