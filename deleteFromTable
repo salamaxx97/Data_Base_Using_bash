@@ -92,7 +92,7 @@ deleteFromTable () {
             colData=$(cut -d, -f "$colNumber" "./$tableName")
             # saving data of the targeted col in variable coldata
             # echo $colData # debug
-            if [[ -z $(echo "$colData" | grep "^$value$") ]]; then
+            if [[ -z $(echo "$colData" | grep -Fx "$value") ]]; then
               echo "$value not found"
               echo  "-----------------------------------------"
               continue
